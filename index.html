@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantis — FlexiCap Fund Screener</title>
+  <meta name="description" content="Screen, analyse and compare all Indian Flexi Cap Mutual Funds with AI-powered insights. Built for DIY investors, advisors and finance enthusiasts.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js 4.5.1 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <!-- marked.js 18.0.2 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@18.0.2/lib/marked.umd.js"></script>
+  <!-- html2canvas-pro 2.0.2 -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@2.0.2/dist/html2canvas-pro.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screener.css">
+  <link rel="stylesheet" href="styles/detail-panel.css">
+  <link rel="stylesheet" href="styles/calculator.css">
+</head>
+<body>
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="app-header" id="appHeader">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="logo" id="appLogo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="url(#logoGrad)"/>
+            <path d="M8 22L12 14L16 18L20 10L24 16" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="14" r="2" fill="white" opacity="0.8"/>
+            <circle cx="20" cy="10" r="2" fill="white" opacity="0.8"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#00897B"/>
+                <stop offset="1" stop-color="#00BFA5"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="logo-text">
+            <span class="logo-name">Quantis</span>
+            <span class="logo-tag">FlexiCap Screener</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="header-nav" id="mainNav">
+        <button class="nav-tab active" data-page="screener" id="navScreener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span>Screener</span>
+        </button>
+        <button class="nav-tab" data-page="calculator" id="navCalculator">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+          <span>Calculator</span>
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="app-main" id="appMain">
+
+    <!-- ─────── SCREENER PAGE ─────── -->
+    <section class="page page--active" data-page="screener" id="screenerPage">
+      <!-- Stats Bar -->
+      <div class="screener-stats" id="screenerStats">
+        <div class="stat-card">
+          <span class="stat-value" id="statTotalFunds">0</span>
+          <span class="stat-label">Total Funds</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statAvgReturn">0%</span>
+          <span class="stat-label">Avg 3Y CAGR</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statTotalAUM">₹0</span>
+          <span class="stat-label">Total AUM</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statAvgExpense">0%</span>
+          <span class="stat-label">Avg Expense Ratio</span>
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="filter-toolbar" id="filterToolbar">
+        <div class="toolbar-left">
+          <button class="btn btn--outline" id="columnManagerBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            Filters
+          </button>
+          <div class="filter-chips" id="filterChips"></div>
+        </div>
+        <div class="toolbar-right">
+          <div class="search-box" id="searchBox">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search funds..." id="searchInput" aria-label="Search funds">
+          </div>
+          <button class="btn btn--ghost" id="resetAllBtn" style="display:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Reset All
+          </button>
+        </div>
+      </div>
+
+      <!-- Column Manager Dropdown -->
+      <div class="column-manager" id="columnManager" style="display:none;">
+        <div class="cm-header">
+          <h3>Manage Columns</h3>
+          <button class="icon-btn cm-close" id="cmClose" aria-label="Close column manager">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="cm-list" id="cmList"></div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-container" id="tableContainer">
+        <div class="table-scroll">
+          <table class="screener-table" id="screenerTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          <h3>No funds match your filters</h3>
+          <p>Try adjusting your filter criteria or reset all filters.</p>
+          <button class="btn btn--primary" id="emptyResetBtn">Clear All Filters</button>
+        </div>
+        <!-- Loading state -->
+        <div class="loading-state" id="loadingState">
+          <div class="loader"></div>
+          <p>Loading fund data...</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <span class="pagination-info" id="paginationInfo">Showing 0 of 0 funds</span>
+        <div class="pagination-controls" id="paginationControls"></div>
+      </div>
+    </section>
+
+    <!-- ─────── CALCULATOR PAGE ─────── -->
+    <section class="page" data-page="calculator" id="calculatorPage">
+      <div class="calc-layout">
+        <div class="calc-inputs-panel">
+          <div class="calc-header">
+            <h2>Returns Calculator</h2>
+            <p>Estimate your mutual fund investment returns</p>
+          </div>
+
+          <!-- Mode Toggle -->
+          <div class="calc-mode-toggle" id="calcModeToggle">
+            <button class="mode-btn active" data-mode="sip" id="modeSIP">SIP</button>
+            <button class="mode-btn" data-mode="lumpsum" id="modeLumpsum">Lump Sum</button>
+            <div class="mode-indicator"></div>
+          </div>
+
+          <!-- SIP Inputs -->
+          <div class="calc-inputs" id="sipInputs">
+            <div class="input-group">
+              <label for="sipAmount">Monthly Investment</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="sipAmount" value="5000" min="500" max="1000000" step="500">
+              </div>
+              <input type="range" id="sipAmountSlider" min="500" max="1000000" step="500" value="5000" class="slider">
+            </div>
+            <div class="input-group">
+              <label for="sipReturn">Expected Annual Return</label>
+              <div class="input-with-suffix">
+                <input type="number" id="sipReturn" value="12" min="1" max="40" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+              <input type="range" id="sipReturnSlider" min="1" max="40" step="0.5" value="12" class="slider">
+            </div>
+            <div class="input-group">
+              <label for="sipDuration">Investment Duration</label>
+              <div class="input-with-suffix">
+                <input type="number" id="sipDuration" value="10" min="1" max="40" step="1">
+                <span class="input-suffix">Years</span>
+              </div>
+              <input type="range" id="sipDurationSlider" min="1" max="40" step="1" value="10" class="slider">
+            </div>
+            <div class="input-group">
+              <label for="sipStepUp">Annual Step-Up (Optional)</label>
+              <div class="input-with-suffix">
+                <input type="number" id="sipStepUp" value="0" min="0" max="50" step="1">
+                <span class="input-suffix">%</span>
+              </div>
+              <input type="range" id="sipStepUpSlider" min="0" max="50" step="1" value="0" class="slider">
+            </div>
+          </div>
+
+          <!-- Lump Sum Inputs -->
+          <div class="calc-inputs" id="lumpsumInputs" style="display:none;">
+            <div class="input-group">
+              <label for="lsAmount">One-Time Investment</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="lsAmount" value="100000" min="1000" max="100000000" step="1000">
+              </div>
+              <input type="range" id="lsAmountSlider" min="1000" max="10000000" step="1000" value="100000" class="slider">
+            </div>
+            <div class="input-group">
+              <label for="lsReturn">Expected Annual Return</label>
+              <div class="input-with-suffix">
+                <input type="number" id="lsReturn" value="12" min="1" max="40" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+              <input type="range" id="lsReturnSlider" min="1" max="40" step="0.5" value="12" class="slider">
+            </div>
+            <div class="input-group">
+              <label for="lsDuration">Investment Duration</label>
+              <div class="input-with-suffix">
+                <input type="number" id="lsDuration" value="10" min="1" max="40" step="1">
+                <span class="input-suffix">Years</span>
+              </div>
+              <input type="range" id="lsDurationSlider" min="1" max="40" step="1" value="10" class="slider">
+            </div>
+          </div>
+
+          <!-- Fund prefill button (shown when coming from detail panel) -->
+          <button class="btn btn--accent btn--fund-prefill" id="fundPrefillBtn" style="display:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+            Use <span id="prefillFundName">Fund</span>'s 5Y CAGR
+          </button>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="calc-results-panel" id="calcResults">
+          <div class="result-cards" id="resultCards">
+            <div class="result-card result-card--invested">
+              <span class="result-label">Total Invested</span>
+              <span class="result-value" id="resultInvested">₹0</span>
+            </div>
+            <div class="result-card result-card--returns">
+              <span class="result-label">Estimated Returns</span>
+              <span class="result-value" id="resultReturns">₹0</span>
+            </div>
+            <div class="result-card result-card--corpus highlight">
+              <span class="result-label">Total Corpus</span>
+              <span class="result-value" id="resultCorpus">₹0</span>
+            </div>
+            <div class="result-card result-card--multiple">
+              <span class="result-label">Return Multiple</span>
+              <span class="result-value" id="resultMultiple">0x</span>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="result-charts">
+            <div class="chart-card">
+              <h4>Investment Breakdown</h4>
+              <div class="chart-wrapper doughnut-wrapper">
+                <canvas id="doughnutChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h4>Corpus Growth Over Time</h4>
+              <div class="chart-wrapper area-wrapper">
+                <canvas id="areaChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Year-by-year table -->
+          <details class="year-table-details">
+            <summary>Year-by-Year Breakdown</summary>
+            <div class="year-table-wrap">
+              <table class="year-table" id="yearTable">
+                <thead>
+                  <tr><th>Year</th><th>Invested</th><th>Returns</th><th>Corpus</th></tr>
+                </thead>
+                <tbody id="yearTableBody"></tbody>
+              </table>
+            </div>
+          </details>
+
+          <!-- Export -->
+          <div class="calc-export">
+            <button class="btn btn--outline" id="copyResultsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Results
+            </button>
+            <button class="btn btn--outline" id="downloadImgBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download as Image
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══════════════ FUND DETAIL PANEL ═══════════════ -->
+  <div class="detail-overlay" id="detailOverlay"></div>
+  <aside class="detail-panel" id="detailPanel">
+    <div class="detail-panel-inner" id="detailPanelInner">
+      <!-- Populated dynamically by detail-panel.js -->
+    </div>
+  </aside>
+
+  <!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+  <div class="modal-overlay" id="settingsOverlay" style="display:none;">
+    <div class="modal" id="settingsModal">
+      <div class="modal-header">
+        <h3>Settings</h3>
+        <button class="icon-btn" id="settingsClose" aria-label="Close settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <label for="geminiKeyInput">Gemini API Key</label>
+          <div class="key-input-wrap">
+            <input type="password" id="geminiKeyInput" placeholder="Enter your Gemini API key" autocomplete="off">
+            <button class="icon-btn key-toggle" id="keyToggle" aria-label="Toggle key visibility">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="settings-note">Your API key is stored locally in your browser. It is never sent to any server other than Google's API.</p>
+          <div class="settings-actions">
+            <button class="btn btn--primary" id="saveKeyBtn">Save Key</button>
+            <button class="btn btn--ghost" id="clearKeyBtn">Clear Key</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <label>How to get an API key</label>
+          <ol class="settings-steps">
+            <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noopener">Google AI Studio</a></li>
+            <li>Sign in with your Google account</li>
+            <li>Click "Get API Key" → "Create API Key"</li>
+            <li>Copy the key and paste it above</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ERROR STATE ═══════════════ -->
+  <div class="error-overlay" id="errorOverlay" style="display:none;">
+    <div class="error-card">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--negative)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <h2>Something went wrong</h2>
+      <p id="errorMessage">Could not load fund data. Please check the data file and try again.</p>
+      <button class="btn btn--primary" id="retryBtn">Retry</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/data-loader.js"></script>
+  <script src="scripts/screener.js"></script>
+  <script src="scripts/column-manager.js"></script>
+  <script src="scripts/detail-panel.js"></script>
+  <script src="scripts/gemini.js"></script>
+  <script src="scripts/calculator.js"></script>
+  <script src="scripts/main.js"></script>
+</body>
+</html>
