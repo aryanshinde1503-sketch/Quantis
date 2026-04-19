@@ -300,24 +300,25 @@
 .tooltip-trigger::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px); /* Appears below the element */
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  padding: var(--sp-2) var(--sp-3);
-  background: var(--text-primary);
-  color: var(--bg);
+  transform: translateX(-50%) translateY(-4px); /* Animate downwards */
+  width: 220px; /* Constant size */
+  padding: var(--sp-3);
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
   font-size: 0.72rem;
   font-weight: 500;
-  line-height: 1.4;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-  max-width: 260px;
+  line-height: 1.5;
+  text-align: left;
+  border-radius: var(--radius-md);
   white-space: normal;
   pointer-events: none;
   opacity: 0;
   transition: all var(--duration-fast);
   z-index: var(--z-dropdown);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .tooltip-trigger:hover::after {

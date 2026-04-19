@@ -6,21 +6,21 @@ const Screener = (() => {
 
   // ─── Column Definitions ───
   const ALL_COLUMNS = [
-    { id: 'fund_name',        label: 'Fund Name',          type: 'string',  default: true, pinned: true,  format: v => v },
-    { id: 'amc',              label: 'AMC',                type: 'string',  default: true, pinned: false, format: v => v },
-    { id: 'aum_cr',           label: 'AUM (₹ Cr)',         type: 'number',  default: true, pinned: false, format: v => Utils.formatAUM(v) },
+    { id: 'fund_name',        label: 'Fund Name',          type: 'string',  default: true, pinned: true,  format: v => v, tooltip: 'Name of the mutual fund scheme.' },
+    { id: 'amc',              label: 'AMC',                type: 'string',  default: true, pinned: false, format: v => v, tooltip: 'Asset Management Company managing the fund.' },
+    { id: 'aum_cr',           label: 'AUM (₹ Cr)',         type: 'number',  default: true, pinned: false, format: v => Utils.formatAUM(v), tooltip: 'Assets Under Management in Crores. Total size of the fund.' },
     { id: 'expense_ratio',    label: 'Expense Ratio (%)',   type: 'number',  default: true, pinned: false, format: v => Utils.formatPercentPlain(v), tooltip: 'Annual fee as % of AUM. Lower is better.' },
-    { id: 'cagr_3y',          label: '3Y CAGR (%)',        type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true },
-    { id: 'cagr_5y',          label: '5Y CAGR (%)',        type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true },
-    { id: 'cagr_10y',         label: '10Y CAGR (%)',       type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true },
+    { id: 'cagr_3y',          label: '3Y CAGR (%)',        type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true, tooltip: 'Compounded Annual Growth Rate over 3 years.' },
+    { id: 'cagr_5y',          label: '5Y CAGR (%)',        type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true, tooltip: 'Compounded Annual Growth Rate over 5 years.' },
+    { id: 'cagr_10y',         label: '10Y CAGR (%)',       type: 'number',  default: true, pinned: false, format: v => Utils.formatPercent(v), color: true, tooltip: 'Compounded Annual Growth Rate over 10 years.' },
     { id: 'sharpe_ratio',     label: 'Sharpe Ratio',       type: 'number',  default: true, pinned: false, format: v => Utils.formatNumber(v), tooltip: 'Excess return per unit of total risk. Higher is better.' },
     { id: 'volatility',       label: 'Volatility',         type: 'number',  default: false, pinned: false, format: v => Utils.formatNumber(v), tooltip: 'Std deviation of returns. Lower = more consistent.' },
     { id: 'alpha',            label: 'Alpha',              type: 'number',  default: false, pinned: false, format: v => Utils.formatNumber(v), tooltip: 'Excess return over benchmark. Positive = fund added value.' },
-    { id: 'pe_ratio',         label: 'P/E Ratio',          type: 'number',  default: false, pinned: false, format: v => Utils.formatNumber(v), tooltip: 'Portfolio Price-to-Earnings ratio.' },
-    { id: 'rolling_return_3y',label: '3Y Rolling Return',  type: 'number',  default: false, pinned: false, format: v => Utils.formatPercent(v), color: true },
-    { id: 'exit_load',        label: 'Exit Load (%)',       type: 'number',  default: false, pinned: false, format: v => v != null ? v + '%' : 'N/A' },
-    { id: 'returns_vs_cat_5y',label: 'vs Category (5Y)',   type: 'number',  default: false, pinned: false, format: v => v ? Utils.formatNumber(v) + 'x' : 'N/A' },
-    { id: 'returns_vs_cat_10y',label:'vs Category (10Y)',  type: 'number',  default: false, pinned: false, format: v => v ? Utils.formatNumber(v) + 'x' : 'N/A' },
+    { id: 'pe_ratio',         label: 'P/E Ratio',          type: 'number',  default: false, pinned: false, format: v => Utils.formatNumber(v), tooltip: 'Portfolio Price-to-Earnings ratio. Valuation metric.' },
+    { id: 'rolling_return_3y',label: '3Y Rolling Return',  type: 'number',  default: false, pinned: false, format: v => Utils.formatPercent(v), color: true, tooltip: 'Average 3-year return rolled over time. Measures consistency.' },
+    { id: 'exit_load',        label: 'Exit Load (%)',       type: 'number',  default: false, pinned: false, format: v => v != null ? v + '%' : 'N/A', tooltip: 'Penalty fee charged for premature withdrawal.' },
+    { id: 'returns_vs_cat_5y',label: 'vs Category (5Y)',   type: 'number',  default: false, pinned: false, format: v => v ? Utils.formatNumber(v) + 'x' : 'N/A', tooltip: '5-year returns divided by 5-year category average.' },
+    { id: 'returns_vs_cat_10y',label:'vs Category (10Y)',  type: 'number',  default: false, pinned: false, format: v => v ? Utils.formatNumber(v) + 'x' : 'N/A', tooltip: '10-year returns divided by 10-year category average.' },
   ];
 
   // ─── State ───

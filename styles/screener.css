@@ -167,13 +167,32 @@
 }
 
 .screener-table thead tr:first-child th:hover {
-  background: var(--surface-hover);
-  color: var(--text-primary);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .screener-table thead tr:first-child th.sorted {
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+/* Glowing Top Line */
+.screener-table thead tr:first-child th::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+
+.screener-table thead tr:first-child th:hover::before,
+.screener-table thead tr:first-child th.sorted::before {
+  opacity: 1;
 }
 
 .th-content {

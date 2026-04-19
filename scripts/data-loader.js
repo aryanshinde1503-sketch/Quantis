@@ -74,7 +74,7 @@ const DataLoader = (() => {
       cagr_3y: toNum(raw['CAGR 3Y']),
       cagr_5y: toNum(raw['CAGR 5Y']),
       cagr_10y: toNum(raw['CAGR 10Y']),
-      rolling_return_3y: toNum(raw['3Y Avg Annual Rolling Return ']),
+      rolling_return_3y: toNum(raw['3Y Avg Annual Rolling Return']),
 
       // Risk metrics
       volatility: toNum(raw['Volatility']),
