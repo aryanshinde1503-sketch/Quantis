@@ -257,7 +257,7 @@ Please provide a comprehensive first-principles analysis.`;
   /** Generate insight with streaming */
   async function generateInsight(fund) {
     // Try localStorage first, fall back to hardcoded key
-    const apiKey = Utils.getFromStorage('gemini_api_key') || 'AIzaSyCB5L4Xnkkpp6MxTy1nrlddSb-glqQSUYk';
+    const apiKey = Utils.getFromStorage('gemini_api_key') || '------';
     const container = document.getElementById('insightContainer');
 
     if (!apiKey) {
