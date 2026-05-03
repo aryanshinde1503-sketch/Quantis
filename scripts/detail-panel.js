@@ -83,7 +83,7 @@ const DetailPanel = (() => {
           ${metricCard('Sharpe Ratio', Utils.formatNumber(fund.sharpe_ratio), 'Risk-adjusted return. Higher is better')}
           ${metricCard('Volatility', Utils.formatNumber(fund.volatility), 'Std deviation. Lower = more consistent')}
           ${metricCard('P/E Ratio', Utils.formatNumber(fund.pe_ratio), 'Portfolio Price-to-Earnings')}
-          ${metricCard('Alpha', Utils.formatNumber(fund.alpha), 'Excess return over benchmark')}
+          ${metricCard('Alpha', Utils.formatPercent(fund.alpha), 'Excess return over benchmark', fund.alpha)}
           ${metricCard('Exit Load', fund.exit_load != null ? fund.exit_load + '%' : 'N/A', 'Fee on early redemption')}
         </div>
       </div>
@@ -174,16 +174,48 @@ const DetailPanel = (() => {
       });
     }
 
-    // Bind AI insight
+    // Bind rule-based insight
     const insightBtn = document.getElementById('generateInsightBtn');
     if (insightBtn) {
       insightBtn.addEventListener('click', () => {
-        Gemini.generateInsight(fund);
+        generateRuleBasedInsight(fund);
       });
     }
 
     // Render returns chart
     setTimeout(() => renderReturnsChart(fund, catAvg), 100);
+  }
+
+  /** Generate simple rule-based insight replacing AI */
+  function generateRuleBasedInsight(fund) {
+    const container = document.getElementById('insightContainer');
+    if (!container) return;
+    
+    container.innerHTML = '<div class="insight-loading">Analyzing fund metrics...</div>';
+    
+    setTimeout(() => {
+      let insight = `<strong>Analysis for ${Utils.escapeHtml(fund.fund_name)}:</strong><br/><br/>`;
+      
+      if (fund.alpha != null) {
+        if (fund.alpha > 0) insight += `✅ <strong>Alpha (${fund.alpha > 2 ? 'Strong' : 'Positive'}):</strong> The fund is outperforming its benchmark by ${fund.alpha.toFixed(2)}%.<br/>`;
+        else insight += `⚠️ <strong>Alpha (Negative):</strong> The fund is underperforming its benchmark by ${Math.abs(fund.alpha).toFixed(2)}%.<br/>`;
+      } else {
+        insight += `ℹ️ <strong>Alpha:</strong> Benchmark comparison is not available.<br/>`;
+      }
+      
+      if (fund.sharpe_ratio != null) {
+        if (fund.sharpe_ratio > 1) insight += `✅ <strong>Sharpe Ratio (Good):</strong> A Sharpe ratio of ${fund.sharpe_ratio} indicates strong risk-adjusted returns.<br/>`;
+        else insight += `⚠️ <strong>Sharpe Ratio (Weak):</strong> A Sharpe ratio of ${fund.sharpe_ratio} suggests lower compensation for the risk taken.<br/>`;
+      }
+      
+      if (fund.expense_ratio != null) {
+        if (fund.expense_ratio < 0.75) insight += `✅ <strong>Expense Ratio (Low):</strong> The expense ratio of ${fund.expense_ratio}% is competitive.<br/>`;
+        else insight += `⚠️ <strong>Expense Ratio (High):</strong> The expense ratio of ${fund.expense_ratio}% is relatively high.<br/>`;
+      }
+      
+      insight += `<br/><em>Note: This is a rule-based evaluation and not financial advice.</em>`;
+      container.innerHTML = `<div class="insight-content">${insight}</div>`;
+    }, 400);
   }
 
   /** Generate a metric card HTML */

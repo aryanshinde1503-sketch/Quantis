@@ -6,6 +6,8 @@
   'use strict';
 
   // ─── Theme ───
+  //arpit
+
   initTheme();
 
   // ─── Navigation ───
@@ -16,12 +18,25 @@
 
   // ─── Load Data ───
   try {
+    const loadingState = document.getElementById('loadingState');
+    const tableContainer = document.getElementById('tableContainer');
+    const emptyState = document.getElementById('emptyState');
+
+    // Explicitly show loading state and hide table to prevent flicker
+    if (loadingState) loadingState.style.display = 'flex';
+    if (tableContainer) tableContainer.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
+
     const { funds } = await DataLoader.loadData();
+
+    // Data ready, restore table visibility
+    if (tableContainer) tableContainer.style.display = 'block';
 
     // Init modules
     Screener.init(funds);
     ColumnManager.init();
     Calculator.init();
+
 
   } catch (err) {
     console.error('Init error:', err);
@@ -85,9 +100,8 @@
 
     function openSettings() {
       overlay.style.display = 'flex';
-      // Load saved key
-      const saved = Utils.getFromStorage('gemini_api_key');
-      if (saved) keyInput.value = saved;
+      keyInput.value = 'AI features disabled';
+      keyInput.disabled = true;
     }
 
     function closeSettings() {
@@ -100,28 +114,19 @@
       if (e.target === overlay) closeSettings();
     });
 
-    // Toggle key visibility
+    // Toggle key visibility (disabled)
     keyToggle.addEventListener('click', () => {
-      keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
+      // Disabled
     });
 
-    // Save key
+    // Save key (disabled)
     saveBtn.addEventListener('click', () => {
-      const key = keyInput.value.trim();
-      if (key) {
-        Utils.setToStorage('gemini_api_key', key);
-        Utils.showToast('API key saved');
-        closeSettings();
-      } else {
-        Utils.showToast('Please enter an API key');
-      }
+      Utils.showToast('Gemini AI has been replaced by local analysis.');
     });
 
-    // Clear key
+    // Clear key (disabled)
     clearBtn.addEventListener('click', () => {
-      Utils.removeFromStorage('gemini_api_key');
-      keyInput.value = '';
-      Utils.showToast('API key cleared');
+      Utils.showToast('Gemini AI has been replaced by local analysis.');
     });
 
     // Escape to close

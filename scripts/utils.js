@@ -6,8 +6,9 @@ const Utils = (() => {
 
   /** Format number in Indian numbering system with ₹ symbol */
   function formatINR(num, decimals = 0) {
-    if (num == null || isNaN(num)) return 'N/A';
+    if (num == null || num === '' || isNaN(num)) return '--';
     const n = Number(num);
+    if (n === 0) return '₹0';
     if (Math.abs(n) >= 1e7) {
       return '₹' + (n / 1e7).toFixed(2) + ' Cr';
     }
@@ -22,8 +23,10 @@ const Utils = (() => {
 
   /** Format AUM in Cr */
   function formatAUM(num) {
-    if (num == null || isNaN(num) || Number(num) === 0) return 'N/A';
-    return '₹' + Number(num).toLocaleString('en-IN', {
+    if (num == null || num === '' || isNaN(num)) return '--';
+    const n = Number(num);
+    if (n === 0) return '--';
+    return '₹' + n.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }) + ' Cr';
@@ -31,23 +34,27 @@ const Utils = (() => {
 
   /** Format percentage with sign */
   function formatPercent(num, decimals = 2) {
-    if (num == null || isNaN(num)) return 'N/A';
+    if (num == null || num === '' || isNaN(num)) return '--';
     const n = Number(num);
-    if (n === 0) return '0.00%';
+    if (n === 0) return '--';
     const sign = n > 0 ? '+' : '';
     return sign + n.toFixed(decimals) + '%';
   }
 
   /** Format percentage without sign */
   function formatPercentPlain(num, decimals = 2) {
-    if (num == null || isNaN(num)) return 'N/A';
-    return Number(num).toFixed(decimals) + '%';
+    if (num == null || num === '' || isNaN(num)) return '--';
+    const n = Number(num);
+    if (n === 0) return '--';
+    return n.toFixed(decimals) + '%';
   }
 
   /** Format generic number */
   function formatNumber(num, decimals = 2) {
-    if (num == null || isNaN(num)) return 'N/A';
-    return Number(num).toFixed(decimals);
+    if (num == null || num === '' || isNaN(num)) return '--';
+    const n = Number(num);
+    if (n === 0) return '--';
+    return n.toFixed(decimals);
   }
 
   /** Debounce */

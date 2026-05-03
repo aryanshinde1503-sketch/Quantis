@@ -173,7 +173,95 @@ const DataLoader = (() => {
         .map((raw, idx) => mapToFundModel(raw, idx))
         .filter(f => f.fund_name !== 'Unknown Fund');
 
+      try {
+        const apiRes = await fetch('https://api.mfapi.in/mf/122639');
+        if (apiRes.ok) {
+          const apiData = await apiRes.json();
+          const ppfas = funds.find(f => f.fund_name && f.fund_name.includes('Parag Parikh'));
+          
+          if (ppfas && apiData && apiData.data && apiData.data.length > 0) {
+            const currentNav = parseFloat(apiData.data[0].nav);
+            // Extract the latest NAV date components for historical offsets
+            const [currentDay, currentMonth, currentYear] = apiData.data[0].date.split('-');
+            
+            // Sort NAV data chronologically (latest to oldest) to allow quick traversal
+            const sortedData = [...apiData.data].sort((a, b) => {
+              const [dayA, monthA, yearA] = a.date.split('-');
+              const [dayB, monthB, yearB] = b.date.split('-');
+              
+              const dateA = new Date(parseInt(yearA), parseInt(monthA) - 1, parseInt(dayA)).getTime();
+              const dateB = new Date(parseInt(yearB), parseInt(monthB) - 1, parseInt(dayB)).getTime();
+              
+              return dateB - dateA; // Descending order
+            });
+
+            /**
+             * Finds the closest available historical NAV on or strictly before the target date.
+             * @param {string} targetDateStr - Target date in DD-MM-YYYY format
+             */
+            const getClosestNav = (targetDateStr) => {
+              const [targetDay, targetMonth, targetYear] = targetDateStr.split('-');
+              const targetTime = new Date(parseInt(targetYear), parseInt(targetMonth) - 1, parseInt(targetDay)).getTime();
+              
+              // Traverse the sorted data to find the first entry matching the timeline condition
+              for (const item of sortedData) {
+                const [itemDay, itemMonth, itemYear] = item.date.split('-');
+                const itemTime = new Date(parseInt(itemYear), parseInt(itemMonth) - 1, parseInt(itemDay)).getTime();
+                
+                if (itemTime <= targetTime) {
+                  return parseFloat(item.nav);
+                }
+              }
+              
+              // Return null if the fund did not exist at or prior to the target date
+              return null;
+            };
+
+            /**
+             * Calculates the Compounded Annual Growth Rate (CAGR).
+             */
+            const calcCagr = (pastNav, years) => {
+              // Ensure CAGR is calculated only when a valid, positive historical NAV is found
+              if (pastNav && pastNav > 0) {
+                return (Math.pow(currentNav / pastNav, 1 / years) - 1) * 100;
+              }
+              return null;
+            };
+
+            // Calculate historical CAGRs by stepping back 3, 5, and 10 years from the latest available date
+            ppfas.cagr_3y = calcCagr(getClosestNav(`${currentDay}-${currentMonth}-${parseInt(currentYear)-3}`), 3);
+            ppfas.cagr_5y = calcCagr(getClosestNav(`${currentDay}-${currentMonth}-${parseInt(currentYear)-5}`), 5);
+            ppfas.cagr_10y = calcCagr(getClosestNav(`${currentDay}-${currentMonth}-${parseInt(currentYear)-10}`), 10);
+          }
+        } else {
+          throw new Error(`API returned status ${apiRes.status}`);
+        }
+      } catch (e) {
+        console.error('Failed to load API data:', e);
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+          Utils.showToast('Using fallback data');
+        }
+      }
+
       categoryAverages = computeCategoryAverages(funds);
+
+      // Re-calculate the relative vs category columns for the updated fund
+      const ppfas = funds.find(f => f.fund_name && f.fund_name.includes('Parag Parikh'));
+      if (ppfas) {
+        if (categoryAverages.cagr_5y) ppfas.returns_vs_cat_5y = ppfas.cagr_5y / categoryAverages.cagr_5y;
+        if (categoryAverages.cagr_10y) ppfas.returns_vs_cat_10y = ppfas.cagr_10y / categoryAverages.cagr_10y;
+      }
+
+      // Calculate Alpha for all funds using fixed benchmark
+      const benchmark = { cagr_3y: 14, cagr_5y: 13, cagr_10y: 12 };
+      funds.forEach(fund => {
+        fund.alpha_3y = (fund.cagr_3y != null) ? fund.cagr_3y - benchmark.cagr_3y : null;
+        fund.alpha_5y = (fund.cagr_5y != null) ? fund.cagr_5y - benchmark.cagr_5y : null;
+        fund.alpha_10y = (fund.cagr_10y != null) ? fund.cagr_10y - benchmark.cagr_10y : null;
+        
+        // Use 3Y alpha as the default alpha for the UI column
+        fund.alpha = fund.alpha_3y;
+      });
 
       return { funds, categoryAverages };
     } catch (err) {
